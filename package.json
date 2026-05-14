@@ -1,0 +1,28 @@
+{
+  "name": "enterprise-collab-suite",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm --workspace backend run dev\" \"npm --workspace frontend run dev\"",
+    "build": "npm --workspace backend run build && npm --workspace frontend run build",
+    "start": "concurrently \"npm --workspace backend start\" \"npm --workspace frontend start\"",
+    "lint": "npm --workspace frontend run lint",
+    "db:generate": "npm --workspace backend run db:generate",
+    "db:migrate": "npm --workspace backend run db:migrate",
+    "db:deploy": "npm --workspace backend run db:deploy",
+    "db:seed": "npm --workspace backend run db:seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "overrides": {
+    "postcss": "^8.5.10",
+    "next": {
+      "postcss": "^8.5.10"
+    }
+  }
+}

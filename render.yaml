@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: enterprise-collab-api
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm --workspace backend run build
+    startCommand: npm --workspace backend run db:deploy && npm --workspace backend start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: enterprise-collab-db
+          property: connectionString
+      - key: CLIENT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+databases:
+  - name: enterprise-collab-db
+    plan: starter

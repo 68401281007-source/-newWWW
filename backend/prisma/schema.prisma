@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleName {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum FileVisibility {
+  PRIVATE
+  DEPARTMENT
+  SHARED
+}
+
+model User {
+  id              String         @id @default(cuid())
+  name            String
+  email           String         @unique
+  passwordHash    String
+  avatarUrl       String?
+  role            RoleName       @default(EMPLOYEE)
+  departmentId    String?
+  department      Department?    @relation(fields: [departmentId], references: [id])
+  twoFactorSecret String?
+  twoFactorOn     Boolean        @default(false)
+  refreshToken    String?
+  online          Boolean        @default(false)
+  files           FileAsset[]
+  messages        Message[]
+  notifications   Notification[]
+  activityLogs    ActivityLog[]
+  drafts          AutoSaveDraft[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model Department {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  description String
+  users       User[]
+  files       FileAsset[]
+  messages    Message[]
+  createdAt   DateTime    @default(now())
+}
+
+model FileAsset {
+  id           String         @id @default(cuid())
+  name         String
+  originalName String
+  mimeType     String
+  size         Int
+  category     String
+  url          String
+  provider     String         @default("local")
+  version      Int            @default(1)
+  visibility   FileVisibility @default(DEPARTMENT)
+  ownerId      String
+  owner        User           @relation(fields: [ownerId], references: [id])
+  departmentId String?
+  department   Department?    @relation(fields: [departmentId], references: [id])
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model Message {
+  id           String      @id @default(cuid())
+  content      String
+  attachmentUrl String?
+  senderId     String
+  sender       User        @relation(fields: [senderId], references: [id])
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  room         String      @default("general")
+  createdAt    DateTime    @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  type      String
+  read      Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  metadata  Json?
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  role        RoleName
+  resource    String
+  canRead     Boolean  @default(true)
+  canCreate   Boolean  @default(false)
+  canUpdate   Boolean  @default(false)
+  canDelete   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model AutoSaveDraft {
+  id        String   @id @default(cuid())
+  scope     String
+  payload   Json
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  updatedAt DateTime @updatedAt
+
+  @@unique([scope, userId])
+}
