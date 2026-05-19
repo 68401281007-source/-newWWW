@@ -1,7 +1,0 @@
-node_modules
-.next
-dist
-.env
-*.log
-backend/uploads/*
-!backend/uploads/.gitkeep
